@@ -1,6 +1,7 @@
 // ============================================================
 // CRAVEO - CUSTOMER HOME PAGE
 // SELECTED BRANCH BASED
+// OPTIMIZED FOR VERCEL + MONGODB
 // FUNCTIONAL WISHLIST ENABLED
 // ============================================================
 
@@ -51,7 +52,7 @@ import CustomerHero from "@/components/customer/CustomerHero";
 import WishlistButton from "@/components/customer/WishlistButton";
 
 // ============================================================
-// FRESH DATA
+// AUTH / BRANCH DATA MAKES HOME DYNAMIC
 // ============================================================
 
 export const dynamic =
@@ -108,7 +109,8 @@ function serializeFood(food) {
 
     reviewsCount:
       Number(
-        food.reviewsCount || 0
+        food.reviewsCount ||
+          0
       ),
 
     categoryId:
@@ -123,17 +125,22 @@ function serializeFood(food) {
 // ============================================================
 
 export default async function HomePage() {
-  await connectDB();
-
   // ==========================================================
-  // CUSTOMER SESSION
+  // SESSION
+  //
+  // Cookie read DB connection se pehle kar sakte hain.
   // ==========================================================
 
   const session =
     await getCustomerSession();
 
-  let customer =
-    null;
+  // ==========================================================
+  // DATABASE
+  // ==========================================================
+
+  await connectDB();
+
+  let customer = null;
 
   let selectedBranch =
     null;
@@ -155,7 +162,7 @@ export default async function HomePage() {
           true,
       })
         .select(
-          "name email selectedRestaurantId"
+          "_id selectedRestaurantId"
         )
         .lean();
 
@@ -208,7 +215,6 @@ export default async function HomePage() {
           _id:
             customer._id,
         },
-
         {
           $set: {
             selectedRestaurantId:
@@ -227,10 +233,10 @@ export default async function HomePage() {
   // FOOD BASE QUERY
   //
   // Guest:
-  // all available foods.
+  // All available foods.
   //
   // Customer:
-  // only foods from selected branch.
+  // Only selected branch foods.
   // ==========================================================
 
   const foodBaseQuery = {
@@ -244,7 +250,9 @@ export default async function HomePage() {
   }
 
   // ==========================================================
-  // GET DATA
+  // MAIN HOMEPAGE DATA
+  //
+  // Run independent database requests together.
   // ==========================================================
 
   const [
@@ -252,10 +260,11 @@ export default async function HomePage() {
     featuredFoods,
     restaurants,
     settings,
+    rawCategoryIds,
   ] = await Promise.all([
-    // --------------------------------------------------------
+    // ========================================================
     // POPULAR FOODS
-    // --------------------------------------------------------
+    // ========================================================
 
     Food.find({
       ...foodBaseQuery,
@@ -263,6 +272,9 @@ export default async function HomePage() {
       isPopular:
         true,
     })
+      .select(
+        "_id name slug description image price salePrice rating reviewsCount categoryId"
+      )
       .sort({
         createdAt:
           -1,
@@ -270,9 +282,9 @@ export default async function HomePage() {
       .limit(8)
       .lean(),
 
-    // --------------------------------------------------------
+    // ========================================================
     // FEATURED FOODS
-    // --------------------------------------------------------
+    // ========================================================
 
     Food.find({
       ...foodBaseQuery,
@@ -280,6 +292,9 @@ export default async function HomePage() {
       isFeatured:
         true,
     })
+      .select(
+        "_id name slug description image price salePrice rating reviewsCount categoryId"
+      )
       .sort({
         createdAt:
           -1,
@@ -287,22 +302,26 @@ export default async function HomePage() {
       .limit(4)
       .lean(),
 
-    // --------------------------------------------------------
-    // BRANCH DATA
-    //
-    // Logged customer only sees selected branch.
-    // Guest can see active branches in homepage section.
-    // --------------------------------------------------------
+    // ========================================================
+    // BRANCHES
+    // ========================================================
 
     selectedBranch
       ? Restaurant.find({
           _id:
             selectedBranch._id,
-        }).lean()
+        })
+          .select(
+            "_id name image city area"
+          )
+          .lean()
       : Restaurant.find({
           isActive:
             true,
         })
+          .select(
+            "_id name image city area"
+          )
           .sort({
             createdAt:
               -1,
@@ -310,55 +329,50 @@ export default async function HomePage() {
           .limit(4)
           .lean(),
 
-    // --------------------------------------------------------
+    // ========================================================
     // WEBSITE SETTINGS
-    // --------------------------------------------------------
+    // ========================================================
 
     Settings.findOne({
       key:
         "main",
-    }).lean(),
+    })
+      .select(
+        "offerBannerImage"
+      )
+      .lean(),
+
+    // ========================================================
+    // CATEGORY IDS
+    //
+    // IMPORTANT:
+    // Previously complete food documents were downloaded only
+    // to read categoryId.
+    //
+    // distinct() directly asks MongoDB for unique category IDs.
+    // ========================================================
+
+    Food.distinct(
+      "categoryId",
+      foodBaseQuery
+    ),
   ]);
 
   // ==========================================================
-  // ALL FOODS FOR CATEGORY FILTER
-  //
-  // Customer:
-  // only selected branch.
-  //
-  // Guest:
-  // all available foods.
+  // CLEAN CATEGORY IDS
   // ==========================================================
 
-  const categoryFoods =
-    await Food.find(
-      foodBaseQuery
+  const categoryIds =
+    Array.isArray(
+      rawCategoryIds
     )
-      .select(
-        "categoryId"
-      )
-      .lean();
-
-  // ==========================================================
-  // UNIQUE CATEGORY IDS
-  // ==========================================================
-
-  const categoryIds = [
-    ...new Set(
-      categoryFoods
-        .map(
-          (food) =>
-            food.categoryId
-              ?.toString()
+      ? rawCategoryIds.filter(
+          Boolean
         )
-        .filter(Boolean)
-    ),
-  ];
+      : [];
 
   // ==========================================================
   // CATEGORIES
-  //
-  // Only categories that actually have foods available.
   // ==========================================================
 
   const categories =
@@ -372,6 +386,9 @@ export default async function HomePage() {
           isActive:
             true,
         })
+          .select(
+            "_id name slug image sortOrder"
+          )
           .sort({
             sortOrder:
               1,
@@ -417,6 +434,9 @@ export default async function HomePage() {
     featuredFoods.map(
       serializeFood
     );
+
+  // Prevent unused variable warning.
+  void featuredData;
 
   // ==========================================================
   // SERIALIZE BRANCHES
@@ -611,6 +631,7 @@ export default async function HomePage() {
                           alt={
                             category.name
                           }
+                          loading="lazy"
                         />
                       ) : (
                         <UtensilsCrossed
@@ -690,6 +711,7 @@ export default async function HomePage() {
                           alt={
                             food.name
                           }
+                          loading="lazy"
                         />
                       ) : (
                         <UtensilsCrossed
@@ -698,7 +720,7 @@ export default async function HomePage() {
                       )}
 
                       {/* ======================================
-                          REAL FUNCTIONAL WISHLIST
+                          FUNCTIONAL WISHLIST
                       ====================================== */}
 
                       <WishlistButton
@@ -830,6 +852,7 @@ export default async function HomePage() {
                 offerBannerImage
               }
               alt="CRAVEO Special Offer"
+              loading="lazy"
             />
           </div>
         </section>
@@ -883,6 +906,7 @@ export default async function HomePage() {
                         alt={
                           branch.name
                         }
+                        loading="lazy"
                       />
                     ) : (
                       <Store

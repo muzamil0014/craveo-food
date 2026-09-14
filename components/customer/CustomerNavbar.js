@@ -1,6 +1,6 @@
 // ============================================================
 // CRAVEO - CUSTOMER NAVBAR SERVER WRAPPER
-// CUSTOMER + BRANCH + CART + WISHLIST
+// OPTIMIZED CUSTOMER + BRANCH + CART + WISHLIST
 // ============================================================
 
 import {
@@ -19,21 +19,12 @@ import Wishlist from "@/models/Wishlist";
 import CustomerNavbarClient from "@/components/customer/CustomerNavbarClient";
 
 // ============================================================
-// ALWAYS FRESH
-// ============================================================
-
-export const dynamic =
-  "force-dynamic";
-
-export const revalidate = 0;
-
-// ============================================================
 // COMPONENT
 // ============================================================
 
 export default async function CustomerNavbar() {
   // ==========================================================
-  // DEFAULT DATA
+  // DEFAULT VALUES
   // ==========================================================
 
   let customer = null;
@@ -44,170 +35,216 @@ export default async function CustomerNavbar() {
 
   let wishlistCount = 0;
 
-  // ==========================================================
-  // DATABASE
-  // ==========================================================
-
   try {
-    await connectDB();
-
     // ========================================================
-    // SESSION
+    // SESSION FIRST
+    //
+    // Guest ho to navbar ke liye database hit ki zarurat nahi.
     // ========================================================
 
     const session =
       await getCustomerSession();
 
+    if (!session?.userId) {
+      return (
+        <CustomerNavbarClient
+          customer={null}
+          branch={null}
+          cartCount={0}
+          wishlistCount={0}
+        />
+      );
+    }
+
     // ========================================================
-    // LOGGED IN CUSTOMER
+    // DATABASE
     // ========================================================
 
-    if (session?.userId) {
+    await connectDB();
+
+    // ========================================================
+    // CUSTOMER
+    // ========================================================
+
+    const user =
+      await User.findOne({
+        _id:
+          session.userId,
+
+        role:
+          "customer",
+
+        isActive:
+          true,
+      })
+        .select(
+          "_id name email avatar city selectedRestaurantId"
+        )
+        .lean();
+
+    // ========================================================
+    // INVALID / DELETED USER
+    // ========================================================
+
+    if (!user) {
+      return (
+        <CustomerNavbarClient
+          customer={null}
+          branch={null}
+          cartCount={0}
+          wishlistCount={0}
+        />
+      );
+    }
+
+    // ========================================================
+    // CUSTOMER DATA
+    // ========================================================
+
+    customer = {
+      id:
+        user._id.toString(),
+
+      name:
+        user.name || "",
+
+      email:
+        user.email || "",
+
+      city:
+        user.city || "",
+
+      avatar:
+        user.avatar || "",
+    };
+
+    // ========================================================
+    // PARALLEL QUERIES
+    //
+    // Previously:
+    // Branch -> Cart -> Wishlist
+    //
+    // Now:
+    // Branch + Cart + Wishlist together.
+    // ========================================================
+
+    const [
+      selectedBranch,
+      cart,
+      wishlist,
+    ] = await Promise.all([
       // ======================================================
-      // USER
+      // SELECTED BRANCH
       // ======================================================
 
-      const user =
-        await User.findOne({
-          _id:
-            session.userId,
+      user.selectedRestaurantId
+        ? Restaurant.findOne({
+            _id:
+              user.selectedRestaurantId,
 
-          role:
-            "customer",
-
-          isActive:
-            true,
-        })
-          .select(
-            "name email avatar city selectedRestaurantId"
-          )
-          .lean();
+            isActive:
+              true,
+          })
+            .select(
+              "_id name city area"
+            )
+            .lean()
+        : Promise.resolve(
+            null
+          ),
 
       // ======================================================
-      // CUSTOMER DATA
+      // CART
       // ======================================================
 
-      if (user) {
-        customer = {
-          id:
-            user._id.toString(),
+      Cart.findOne({
+        userId:
+          user._id,
+      })
+        .select(
+          "items.quantity"
+        )
+        .lean(),
 
-          name:
-            user.name || "",
+      // ======================================================
+      // WISHLIST
+      // ======================================================
 
-          email:
-            user.email || "",
+      Wishlist.findOne({
+        userId:
+          user._id,
+      })
+        .select(
+          "items"
+        )
+        .lean(),
+    ]);
 
-          city:
-            user.city || "",
+    // ========================================================
+    // BRANCH DATA
+    // ========================================================
 
-          avatar:
-            user.avatar || "",
-        };
+    if (selectedBranch) {
+      branch = {
+        id:
+          selectedBranch._id.toString(),
 
-        // ====================================================
-        // SELECTED BRANCH
-        // ====================================================
+        name:
+          selectedBranch.name ||
+          "",
 
-        if (
-          user.selectedRestaurantId
-        ) {
-          const selectedBranch =
-            await Restaurant.findOne({
-              _id:
-                user.selectedRestaurantId,
+        city:
+          selectedBranch.city ||
+          "",
 
-              isActive:
-                true,
-            })
-              .select(
-                "name city area"
+        area:
+          selectedBranch.area ||
+          "",
+      };
+    }
+
+    // ========================================================
+    // CART COUNT
+    // ========================================================
+
+    if (
+      Array.isArray(
+        cart?.items
+      )
+    ) {
+      cartCount =
+        cart.items.reduce(
+          (
+            total,
+            item
+          ) => {
+            return (
+              total +
+              Number(
+                item?.quantity ||
+                  0
               )
-              .lean();
-
-          if (
-            selectedBranch
-          ) {
-            branch = {
-              id:
-                selectedBranch._id.toString(),
-
-              name:
-                selectedBranch.name ||
-                "",
-
-              city:
-                selectedBranch.city ||
-                "",
-
-              area:
-                selectedBranch.area ||
-                "",
-            };
-          }
-        }
-
-        // ====================================================
-        // CART
-        // ====================================================
-
-        const cart =
-          await Cart.findOne({
-            userId:
-              user._id,
-          })
-            .select(
-              "items"
-            )
-            .lean();
-
-        if (
-          Array.isArray(
-            cart?.items
-          )
-        ) {
-          cartCount =
-            cart.items.reduce(
-              (
-                total,
-                item
-              ) =>
-                total +
-                Number(
-                  item.quantity ||
-                    0
-                ),
-              0
             );
-        }
+          },
+          0
+        );
+    }
 
-        // ====================================================
-        // WISHLIST
-        // ====================================================
+    // ========================================================
+    // WISHLIST COUNT
+    // ========================================================
 
-        const wishlist =
-          await Wishlist.findOne({
-            userId:
-              user._id,
-          })
-            .select(
-              "items"
-            )
-            .lean();
-
-        if (
-          Array.isArray(
-            wishlist?.items
-          )
-        ) {
-          wishlistCount =
-            wishlist.items.length;
-        }
-      }
+    if (
+      Array.isArray(
+        wishlist?.items
+      )
+    ) {
+      wishlistCount =
+        wishlist.items.length;
     }
   } catch (error) {
     // ========================================================
-    // NAVBAR SHOULD NOT CRASH WHOLE WEBSITE
+    // NAVBAR ERROR SHOULD NOT CRASH COMPLETE WEBSITE
     // ========================================================
 
     console.error(
