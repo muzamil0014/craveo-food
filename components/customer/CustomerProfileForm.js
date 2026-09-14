@@ -24,7 +24,8 @@ import { useState } from "react";
 // ============================================================
 
 async function readResponse(response) {
-  const text = await response.text();
+  const text =
+    await response.text();
 
   if (!text) {
     return {};
@@ -47,27 +48,32 @@ export default function CustomerProfileForm({
   user,
   cities = [],
 }) {
-  const router = useRouter();
+  const router =
+    useRouter();
 
   // ==========================================================
   // STATE
   // ==========================================================
 
-  const [name, setName] = useState(
-    user?.name || ""
-  );
+  const [name, setName] =
+    useState(
+      user?.name || ""
+    );
 
-  const [phone, setPhone] = useState(
-    user?.phone || ""
-  );
+  const [phone, setPhone] =
+    useState(
+      user?.phone || ""
+    );
 
-  const [city, setCity] = useState(
-    user?.city || ""
-  );
+  const [city, setCity] =
+    useState(
+      user?.city || ""
+    );
 
-  const [avatar, setAvatar] = useState(
-    user?.avatar || ""
-  );
+  const [avatar, setAvatar] =
+    useState(
+      user?.avatar || ""
+    );
 
   const [
     avatarPublicId,
@@ -93,17 +99,65 @@ export default function CustomerProfileForm({
   // ==========================================================
 
   async function handleImageChange(event) {
+    const input =
+      event.target;
+
     const file =
-      event.target.files?.[0];
+      input.files?.[0];
 
     if (!file) {
       return;
     }
 
     try {
+      // ======================================================
+      // RESET MESSAGES
+      // ======================================================
+
       setUploading(true);
       setError("");
       setSuccess("");
+
+      // ======================================================
+      // IMAGE TYPE CHECK
+      // ======================================================
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+      ];
+
+      if (
+        !allowedTypes.includes(
+          file.type
+        )
+      ) {
+        throw new Error(
+          "Only JPG, PNG or WEBP images are allowed."
+        );
+      }
+
+      // ======================================================
+      // IMAGE SIZE CHECK
+      // MAX 5MB
+      // ======================================================
+
+      const maxSize =
+        5 * 1024 * 1024;
+
+      if (
+        file.size >
+        maxSize
+      ) {
+        throw new Error(
+          "Image must be less than 5MB."
+        );
+      }
+
+      // ======================================================
+      // FORM DATA
+      // ======================================================
 
       const formData =
         new FormData();
@@ -113,17 +167,28 @@ export default function CustomerProfileForm({
         file
       );
 
-      formData.append(
-        "folder",
-        "craveo/customers"
-      );
+      // ======================================================
+      // IMPORTANT
+      //
+      // CUSTOMER AVATAR MUST USE CUSTOMER API.
+      // DO NOT USE /api/admin/upload HERE.
+      // ======================================================
 
       const response =
         await fetch(
-          "/api/admin/upload",
+          "/api/customer/avatar",
           {
-            method: "POST",
-            body: formData,
+            method:
+              "POST",
+
+            body:
+              formData,
+
+            credentials:
+              "include",
+
+            cache:
+              "no-store",
           }
         );
 
@@ -132,30 +197,72 @@ export default function CustomerProfileForm({
           response
         );
 
+      // ======================================================
+      // API ERROR
+      // ======================================================
+
       if (
         !response.ok ||
         result.success !== true
       ) {
         throw new Error(
           result.message ||
-            "Unable to upload image."
+            "Unable to upload profile image."
+        );
+      }
+
+      // ======================================================
+      // SAVE CLOUDINARY IMAGE DATA
+      //
+      // CUSTOMER AVATAR API RETURNS:
+      //
+      // {
+      //   success: true,
+      //   image: {
+      //     url,
+      //     publicId
+      //   }
+      // }
+      // ======================================================
+
+      const imageUrl =
+        result.image?.url || "";
+
+      const publicId =
+        result.image?.publicId || "";
+
+      if (!imageUrl) {
+        throw new Error(
+          "Image URL was not returned by server."
         );
       }
 
       setAvatar(
-        result.url || ""
+        imageUrl
       );
 
       setAvatarPublicId(
-        result.publicId || ""
+        publicId
+      );
+
+      setSuccess(
+        "Profile picture uploaded. Press Save Profile to finish."
       );
     } catch (error) {
+      console.error(
+        "CUSTOMER AVATAR ERROR:",
+        error
+      );
+
       setError(
         error?.message ||
           "Unable to upload image."
       );
     } finally {
       setUploading(false);
+
+      // Allow selecting same image again
+      input.value = "";
     }
   }
 
@@ -171,6 +278,10 @@ export default function CustomerProfileForm({
       setError("");
       setSuccess("");
 
+      // ======================================================
+      // VALIDATION
+      // ======================================================
+
       if (!name.trim()) {
         throw new Error(
           "Full name is required."
@@ -183,26 +294,42 @@ export default function CustomerProfileForm({
         );
       }
 
+      // ======================================================
+      // UPDATE PROFILE
+      // ======================================================
+
       const response =
         await fetch(
           "/api/customer/profile",
           {
-            method: "PUT",
+            method:
+              "PUT",
 
             headers: {
               "Content-Type":
                 "application/json",
             },
 
-            cache: "no-store",
+            credentials:
+              "include",
 
-            body: JSON.stringify({
-              name: name.trim(),
-              phone: phone.trim(),
-              city,
-              avatar,
-              avatarPublicId,
-            }),
+            cache:
+              "no-store",
+
+            body:
+              JSON.stringify({
+                name:
+                  name.trim(),
+
+                phone:
+                  phone.trim(),
+
+                city,
+
+                avatar,
+
+                avatarPublicId,
+              }),
           }
         );
 
@@ -210,6 +337,10 @@ export default function CustomerProfileForm({
         await readResponse(
           response
         );
+
+      // ======================================================
+      // ERROR
+      // ======================================================
 
       if (
         !response.ok ||
@@ -220,6 +351,10 @@ export default function CustomerProfileForm({
             "Unable to update profile."
         );
       }
+
+      // ======================================================
+      // SUCCESS
+      // ======================================================
 
       setSuccess(
         "Profile updated successfully."
@@ -232,7 +367,8 @@ export default function CustomerProfileForm({
       // ======================================================
 
       if (
-        result.branchReset === true
+        result.branchReset ===
+        true
       ) {
         window.location.replace(
           "/select-branch"
@@ -240,6 +376,10 @@ export default function CustomerProfileForm({
 
         return;
       }
+
+      // ======================================================
+      // REFRESH SERVER DATA
+      // ======================================================
 
       router.refresh();
 
@@ -249,6 +389,11 @@ export default function CustomerProfileForm({
         );
       }, 700);
     } catch (error) {
+      console.error(
+        "CUSTOMER PROFILE UPDATE ERROR:",
+        error
+      );
+
       setError(
         error?.message ||
           "Unable to update profile."
@@ -291,7 +436,9 @@ export default function CustomerProfileForm({
         <div className="customer-profile-photo">
           {avatar ? (
             <img
-              src={avatar}
+              src={
+                avatar
+              }
               alt={
                 name ||
                 "Profile"
@@ -302,6 +449,10 @@ export default function CustomerProfileForm({
               size={38}
             />
           )}
+
+          {/* ==================================================
+              CAMERA BUTTON
+          ================================================== */}
 
           <label
             className="customer-profile-camera"
@@ -320,7 +471,7 @@ export default function CustomerProfileForm({
 
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/jpeg,image/png,image/webp"
               onChange={
                 handleImageChange
               }
@@ -342,6 +493,10 @@ export default function CustomerProfileForm({
             Max 5MB.
           </span>
 
+          {/* ==================================================
+              CHANGE PHOTO BUTTON
+          ================================================== */}
+
           <label className="customer-profile-change-photo">
             {uploading
               ? "Uploading..."
@@ -349,7 +504,7 @@ export default function CustomerProfileForm({
 
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept="image/jpeg,image/png,image/webp"
               onChange={
                 handleImageChange
               }
@@ -388,7 +543,9 @@ export default function CustomerProfileForm({
 
             <input
               type="text"
-              value={name}
+              value={
+                name
+              }
               onChange={(e) =>
                 setName(
                   e.target.value
@@ -415,7 +572,9 @@ export default function CustomerProfileForm({
 
             <input
               type="tel"
-              value={phone}
+              value={
+                phone
+              }
               onChange={(e) =>
                 setPhone(
                   e.target.value
@@ -441,7 +600,9 @@ export default function CustomerProfileForm({
             />
 
             <select
-              value={city}
+              value={
+                city
+              }
               onChange={(e) =>
                 setCity(
                   e.target.value
@@ -456,8 +617,12 @@ export default function CustomerProfileForm({
               {cities.map(
                 (item) => (
                   <option
-                    key={item}
-                    value={item}
+                    key={
+                      item
+                    }
+                    value={
+                      item
+                    }
                   >
                     {item}
                   </option>

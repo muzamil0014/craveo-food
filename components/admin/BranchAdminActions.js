@@ -2,17 +2,11 @@
 
 // ============================================================
 // CRAVEO - BRANCH ADMIN ACTIONS
+// EDIT + STATUS + DELETE
 // ============================================================
 
-import Link from "next/link";
-
-import {
-  useRouter,
-} from "next/navigation";
-
-import {
-  useState,
-} from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import {
   Pencil,
@@ -29,8 +23,7 @@ export default function BranchAdminActions({
   adminName,
   isActive,
 }) {
-  const router =
-    useRouter();
+  const router = useRouter();
 
   const [loading, setLoading] =
     useState("");
@@ -67,10 +60,41 @@ export default function BranchAdminActions({
   }
 
   // ==========================================================
+  // EDIT ADMIN
+  // ==========================================================
+
+  function editAdmin() {
+    if (!adminId) {
+      alert(
+        "Branch Admin ID missing."
+      );
+
+      return;
+    }
+
+    const safeId =
+      encodeURIComponent(
+        String(adminId)
+      );
+
+    router.push(
+      `/admin/dashboard/branch-admins/edit/${safeId}`
+    );
+  }
+
+  // ==========================================================
   // STATUS
   // ==========================================================
 
   async function toggleStatus() {
+    if (!adminId) {
+      alert(
+        "Branch Admin ID missing."
+      );
+
+      return;
+    }
+
     try {
       setLoading("status");
 
@@ -84,6 +108,9 @@ export default function BranchAdminActions({
               "Content-Type":
                 "application/json",
             },
+
+            cache:
+              "no-store",
 
             body:
               JSON.stringify({
@@ -124,6 +151,14 @@ export default function BranchAdminActions({
   // ==========================================================
 
   async function deleteAdmin() {
+    if (!adminId) {
+      alert(
+        "Branch Admin ID missing."
+      );
+
+      return;
+    }
+
     const confirmed =
       window.confirm(
         `Delete Branch Admin "${adminName}"?`
@@ -140,7 +175,11 @@ export default function BranchAdminActions({
         await fetch(
           `/api/admin/branch-admins/${adminId}`,
           {
-            method: "DELETE",
+            method:
+              "DELETE",
+
+            cache:
+              "no-store",
           }
         );
 
@@ -176,6 +215,10 @@ export default function BranchAdminActions({
 
   return (
     <div className="branch-admin-actions">
+      {/* ======================================================
+          ACTIVE / INACTIVE
+      ====================================================== */}
+
       <button
         type="button"
         className={`branch-admin-status-btn ${
@@ -201,16 +244,30 @@ export default function BranchAdminActions({
             : "Inactive"}
       </button>
 
-      <Link
-        href={`/admin/dashboard/branch-admins/edit/${adminId}`}
+      {/* ======================================================
+          EDIT
+      ====================================================== */}
+
+      <button
+        type="button"
         className="branch-admin-edit-btn"
+        onClick={
+          editAdmin
+        }
+        disabled={
+          loading !== ""
+        }
       >
         <Pencil
           size={14}
         />
 
         Edit
-      </Link>
+      </button>
+
+      {/* ======================================================
+          DELETE
+      ====================================================== */}
 
       <button
         type="button"
