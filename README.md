@@ -1,36 +1,199 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏥 HospitalCare+
 
-## Getting Started
+HospitalCare+ is a complete Hospital Management System built with **Next.js**, **MongoDB**, **Mongoose**, and **Cloudinary**.
 
-First, run the development server:
+The system is designed to manage hospital operations through multiple secure portals including **Admin, Doctor, Receptionist, and Patient**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Live Demo
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+**Live Website:**  
+https://hospitalcare-plus.vercel.app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 💻 GitHub Repository
 
-To learn more about Next.js, take a look at the following resources:
+https://github.com/muzamil0014/hospitalcare-plus
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📌 Project Overview
 
-## Deploy on Vercel
+HospitalCare+ provides a centralized digital platform for managing hospital operations efficiently.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The system includes complete management for:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Patients
+- Doctors
+- Receptionists
+- Departments
+- Appointments
+- Admissions
+- Rooms
+- Beds
+- Billing
+- Payments
+- Medical Records
+- Prescriptions
+- Notifications
+- User Profiles
+- Image Uploads
+- Authentication
+- Role-Based Authorization
+
+The platform separates hospital operations into different secure portals so every user can only access the features and records related to their role.
+
+---
+
+## 🛠️ Tech Stack
+
+HospitalCare+ is built using:
+
+- **Next.js**
+- **React**
+- **JavaScript**
+- **MongoDB**
+- **Mongoose**
+- **Cloudinary**
+- **JWT Authentication**
+- **bcryptjs**
+- **Lucide React**
+- **CSS**
+- **Vercel**
+
+---
+
+## 👥 User Roles
+
+HospitalCare+ contains four main user portals:
+
+1. Admin
+2. Doctor
+3. Receptionist
+4. Patient
+
+Each portal contains its own dashboard, permissions, features, and protected APIs.
+
+---
+
+# 👨‍💼 Admin Portal
+
+The Admin has full control over hospital management and system configuration.
+
+### Admin Features
+
+- Admin Dashboard
+- Doctor Management
+- Patient Management
+- Receptionist Management
+- Department Management
+- Appointment Management
+- Admission Management
+- Room Management
+- Bed Management
+- Billing Management
+- Payment Management
+- Medical Records
+- Prescriptions
+- Hospital Settings
+- Profile Management
+- Image Upload Management
+- Role-Based API Security
+
+The Admin can create, update, view, and manage hospital records across the system.
+
+---
+
+# 👨‍⚕️ Doctor Portal
+
+Doctors have their own secure portal and can only access hospital information associated with their authenticated account.
+
+### Doctor Features
+
+- Doctor Dashboard
+- View Own Appointments
+- View Assigned Patients
+- View Patient Medical Records
+- Add Medical Records
+- Add Medical Notes
+- Create Prescriptions
+- View Prescriptions
+- Update Appointment Status
+- Profile Management
+
+Doctors are restricted from accessing data belonging to other doctors unless allowed by system rules.
+
+---
+
+# 👩‍💼 Receptionist Portal
+
+Receptionists manage daily hospital operations such as patient registration, appointments, admissions, and billing.
+
+### Receptionist Features
+
+- Receptionist Dashboard
+- Patient Registration
+- Patient Management
+- Appointment Booking
+- Appointment Management
+- Admission Management
+- Room Availability
+- Bed Availability
+- Billing Management
+- Payment Management
+- Profile Management
+
+Receptionists help manage the daily flow of patients inside the hospital.
+
+---
+
+# 🧑‍🤝‍🧑 Patient Portal
+
+Patients have their own secure portal where they can access their hospital information.
+
+### Patient Features
+
+- Patient Dashboard
+- Book Appointments
+- View Appointments
+- Cancel Appointments
+- View Bills
+- View Payments
+- View Prescriptions
+- View Medical Records
+- Notifications
+- Profile Management
+
+Patients can only access records associated with their own authenticated account.
+
+---
+
+# 📅 Appointment Management
+
+The appointment system manages doctor-patient bookings with validation and scheduling.
+
+### Appointment Features
+
+- Appointment Booking
+- Doctor Selection
+- Department Selection
+- Appointment Date
+- Appointment Time
+- Appointment Reason
+- Daily Token Number
+- Appointment Status
+- Doctor Slot Validation
+- Patient Slot Validation
+- Appointment Cancellation
+- Appointment Completion
+
+### Supported Appointment Statuses
+
+```text
+Pending
+Confirmed
+Completed
+Cancelled
+No Show
