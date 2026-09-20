@@ -1,55 +1,62 @@
-# 🏥 HospitalCare+
+# 🍽️ CRAVEO
 
-HospitalCare+ is a complete Hospital Management System built with **Next.js**, **MongoDB**, **Mongoose**, and **Cloudinary**.
+CRAVEO is a complete Restaurant Management and Food Delivery System built with **Next.js**, **MongoDB**, **Mongoose**, and **Cloudinary**.
 
-The system is designed to manage hospital operations through multiple secure portals including **Admin, Doctor, Receptionist, and Patient**.
+The system is designed to manage restaurant operations through multiple secure portals including **Super Admin, Branch Admin, and Customer**.
 
 ---
 
 ## 🚀 Live Demo
 
 **Live Website:**  
-https://hospitalcare-plus.vercel.app
+https://craveo-food.vercel.app
 
 ---
 
 ## 💻 GitHub Repository
 
-https://github.com/muzamil0014/hospitalcare-plus
+https://github.com/muzamil0014/craveo-food
 
 ---
 
 ## 📌 Project Overview
 
-HospitalCare+ provides a centralized digital platform for managing hospital operations efficiently.
+CRAVEO provides a centralized digital platform for managing restaurant branches, food items, customers, orders, payments, reviews, complaints, and delivery operations.
 
 The system includes complete management for:
 
-- Patients
-- Doctors
-- Receptionists
-- Departments
-- Appointments
-- Admissions
-- Rooms
-- Beds
+- Restaurant Branches
+- Branch Admins
+- Food Categories
+- Food Items
+- Customers
+- Orders
+- Cart
+- Wishlist
+- Checkout
+- Coupons
+- Reviews
+- Complaints
+- Saved Addresses
+- Customer Profiles
+- Branch-Based Menus
+- Branch-Based Pricing
+- Food Availability
 - Billing
 - Payments
-- Medical Records
-- Prescriptions
+- Analytics
 - Notifications
-- User Profiles
 - Image Uploads
 - Authentication
 - Role-Based Authorization
 
-The platform separates hospital operations into different secure portals so every user can only access the features and records related to their role.
+The platform separates restaurant operations into secure portals so each user can only access the features and records related to their role.
 
 ---
 
 ## 🛠️ Tech Stack
 
-HospitalCare+ is built using:
+CRAVEO is built using:
 
 - **Next.js**
 - **React**
@@ -60,6 +67,7 @@ HospitalCare+ is built using:
 - **JWT Authentication**
 - **bcryptjs**
 - **Lucide React**
+- **Recharts**
 - **CSS**
 - **Vercel**
 
@@ -67,133 +75,195 @@ HospitalCare+ is built using:
 
 ## 👥 User Roles
 
-HospitalCare+ contains four main user portals:
+CRAVEO contains three main portals:
 
-1. Admin
-2. Doctor
-3. Receptionist
-4. Patient
+1. Super Admin
+2. Branch Admin
+3. Customer
 
-Each portal contains its own dashboard, permissions, features, and protected APIs.
+Each portal has its own dashboard, permissions, protected routes, and APIs.
 
 ---
 
-# 👨‍💼 Admin Portal
+# 👨‍💼 Super Admin Portal
 
-The Admin has full control over hospital management and system configuration.
+The Super Admin has complete control over the entire restaurant system.
 
-### Admin Features
+### Super Admin Features
 
-- Admin Dashboard
-- Doctor Management
-- Patient Management
-- Receptionist Management
-- Department Management
-- Appointment Management
-- Admission Management
-- Room Management
-- Bed Management
-- Billing Management
-- Payment Management
-- Medical Records
-- Prescriptions
-- Hospital Settings
+- Super Admin Dashboard
+- Restaurant Branch Management
+- Branch Admin Management
+- Category Management
+- Food Management
+- Customer Management
+- Order Management
+- Review Management
+- Coupon Management
+- Complaint Management
+- Analytics
+- Sales Reports
+- Revenue Reports
+- Settings Management
 - Profile Management
 - Image Upload Management
 - Role-Based API Security
 
-The Admin can create, update, view, and manage hospital records across the system.
+The Super Admin can manage all restaurant branches and monitor complete system activity.
 
 ---
 
-# 👨‍⚕️ Doctor Portal
+# 🏪 Branch Admin Portal
 
-Doctors have their own secure portal and can only access hospital information associated with their authenticated account.
+Branch Admins manage only the restaurant branch assigned to their account.
 
-### Doctor Features
+### Branch Admin Features
 
-- Doctor Dashboard
-- View Own Appointments
-- View Assigned Patients
-- View Patient Medical Records
-- Add Medical Records
-- Add Medical Notes
-- Create Prescriptions
-- View Prescriptions
-- Update Appointment Status
+- Branch Dashboard
+- View Own Branch Orders
+- Manage Own Branch Foods
+- Manage Food Availability
+- View Customers
+- Manage Reviews
+- Manage Complaints
+- Branch Analytics
+- Sales Information
 - Profile Management
+- Password Management
 
-Doctors are restricted from accessing data belonging to other doctors unless allowed by system rules.
-
----
-
-# 👩‍💼 Receptionist Portal
-
-Receptionists manage daily hospital operations such as patient registration, appointments, admissions, and billing.
-
-### Receptionist Features
-
-- Receptionist Dashboard
-- Patient Registration
-- Patient Management
-- Appointment Booking
-- Appointment Management
-- Admission Management
-- Room Availability
-- Bed Availability
-- Billing Management
-- Payment Management
-- Profile Management
-
-Receptionists help manage the daily flow of patients inside the hospital.
+Branch Admins cannot access data from other restaurant branches.
 
 ---
 
-# 🧑‍🤝‍🧑 Patient Portal
+# 🧑 Customer Portal
 
-Patients have their own secure portal where they can access their hospital information.
+Customers have their own secure portal for browsing foods, placing orders, and managing their account.
 
-### Patient Features
+### Customer Features
 
-- Patient Dashboard
-- Book Appointments
-- View Appointments
-- Cancel Appointments
-- View Bills
-- View Payments
-- View Prescriptions
-- View Medical Records
-- Notifications
-- Profile Management
+- Customer Registration
+- Customer Login
+- Customer Dashboard
+- Select Restaurant Branch
+- Browse Foods
+- Browse Categories
+- View Food Details
+- Search Foods
+- Add to Cart
+- Update Cart
+- Wishlist
+- Checkout
+- Apply Coupons
+- Place Orders
+- View Orders
+- Track Orders
+- Cancel Orders
+- Edit Eligible Orders
+- View Invoice
+- Manage Saved Addresses
+- Manage Profile
+- Upload Profile Image
+- View Reviews
+- Add Reviews
+- Submit Complaints
+- View Complaint History
+- Logout
 
-Patients can only access records associated with their own authenticated account.
+Customers can only access their own account, orders, addresses, wishlist, reviews, and complaints.
 
 ---
 
-# 📅 Appointment Management
+# 🏪 Restaurant Branch Management
 
-The appointment system manages doctor-patient bookings with validation and scheduling.
+CRAVEO supports multiple restaurant branches.
 
-### Appointment Features
+### Branch Features
 
-- Appointment Booking
-- Doctor Selection
-- Department Selection
-- Appointment Date
-- Appointment Time
-- Appointment Reason
-- Daily Token Number
-- Appointment Status
-- Doctor Slot Validation
-- Patient Slot Validation
-- Appointment Cancellation
-- Appointment Completion
+- Add Branch
+- Edit Branch
+- Delete Branch
+- Activate / Deactivate Branch
+- Branch Name
+- Branch Image
+- City
+- Area
+- Address
+- Phone
+- Email
+- Opening Time
+- Closing Time
+- Delivery Time
+- Delivery Fee
+- Minimum Order
+- Featured Branch
 
-### Supported Appointment Statuses
+Each customer selects a branch before ordering.
+
+Food availability and pricing can be controlled according to the selected branch.
+
+---
+
+# 👨‍💼 Branch Admin Management
+
+The Super Admin can create and manage separate Branch Admin accounts.
+
+### Branch Admin Features
+
+- Add Branch Admin
+- Edit Branch Admin
+- Delete Branch Admin
+- Assign Restaurant Branch
+- Activate / Deactivate Account
+- Name
+- Email
+- Phone
+- Password
+- Role Protection
+
+Each Branch Admin is restricted to the assigned restaurant branch.
+
+---
+
+# 🍔 Food Management
+
+CRAVEO provides complete food management.
+
+### Food Features
+
+- Add Food
+- Edit Food
+- Delete Food
+- Food Name
+- Slug
+- Description
+- Category
+- Food Image
+- Price
+- Sale Price
+- Preparation Time
+- Calories
+- Rating
+- Featured Food
+- Popular Food
+- Availability
+- Branch Assignment
+
+Foods can be assigned to one or more restaurant branches.
+
+---
+
+# 💰 Branch-Based Pricing
+
+Different restaurant branches can have different prices and availability for the same food item.
+
+Example:
 
 ```text
-Pending
-Confirmed
-Completed
-Cancelled
-No Show
+Burger
+├── Gulshan Branch
+│   ├── Price: PKR 650
+│   └── Available: Yes
+│
+└── Clifton Branch
+    ├── Price: PKR 700
+    └── Available: No
